@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.10'
-            args '-u root'
-        }
-    }
+    agent any
 
     environment {
         IMAGE_NAME = "jayaseelan23/flask-demo:latest"
@@ -12,24 +7,22 @@ pipeline {
     }
 
     stages {
-        stage('Install Dependencies') {
+        stage('Install Dependencies & Run Tests') {
+            agent {
+                docker {
+                    image 'python:3.10'
+                    args '-u root'
+                }
+            }
             steps {
                 sh 'pip install -r requirements.txt'
+                sh 'pytest'
             }
         }
 
-        stage('Test and Build') {
-            parallel {
-                stage('Unit Tests') {
-                    steps {
-                        sh 'pytest'
-                    }
-                }
-                stage('Build Docker Image') {
-                    steps {
-                        sh 'docker build -t $IMAGE_NAME .'
-                    }
-                }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
