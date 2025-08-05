@@ -2,6 +2,7 @@ pipeline {
     agent {
         docker {
             image 'python:3.10'
+            args '-u root'
         }
     }
 
@@ -13,7 +14,7 @@ pipeline {
     stages {
         stage('Install Dependencies') {
             steps {
-                sh 'pip install --user -r requirements.txt'
+                sh 'pip install -r requirements.txt'
             }
         }
 
@@ -21,7 +22,7 @@ pipeline {
             parallel {
                 stage('Unit Tests') {
                     steps {
-                        sh 'pytest || true'
+                        sh 'pytest'
                     }
                 }
                 stage('Build Docker Image') {
@@ -34,9 +35,7 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                withDockerRegistry(
-                    [ credentialsId: 'dockerhub-creds-id', url: 'https://index.docker.io/v1/' ]
-                ) {
+                withDockerRegistry([ credentialsId: 'dockerhub-creds-id', url: 'https://index.docker.io/v1/' ]) {
                     sh 'docker push $IMAGE_NAME'
                 }
             }
