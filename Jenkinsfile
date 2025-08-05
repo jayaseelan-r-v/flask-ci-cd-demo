@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10'
+        }
+    }
 
     environment {
         IMAGE_NAME = "jayaseelan23/flask-demo:latest"
@@ -7,7 +11,6 @@ pipeline {
     }
 
     stages {
-
         stage('Install Dependencies') {
             steps {
                 sh 'pip install -r requirements.txt'
@@ -18,7 +21,6 @@ pipeline {
             parallel {
                 stage('Unit Tests') {
                     steps {
-                        // `|| true` prevents build failure if tests fail (for now)
                         sh 'pytest || true'
                     }
                 }
